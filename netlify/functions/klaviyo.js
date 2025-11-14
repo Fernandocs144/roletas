@@ -40,35 +40,41 @@ exports.handler = async (event, context) => {
     console.log("PROFILE TEXT:", await profileRes.text());
 
     // ============================
-    // 2. ENVIAR EVENTO
-    // ============================
-    const eventRes = await fetch("https://a.klaviyo.com/api/events/", {
-      method: "POST",
-      headers: {
-        "Authorization": `Klaviyo-API-Key ${KLAVIYO_KEY}`,
-        "Content-Type": "application/json",
-        "revision": "2024-02-15"
-      },
-      body: JSON.stringify({
-        data: {
-          type: "event",
-          attributes: {
-            metric_id: "INSERE_AQUI_O_METRIC_ID",
+// 2. ENVIAR EVENTO
+// ============================
+const eventRes = await fetch("https://a.klaviyo.com/api/events/", {
+  method: "POST",
+  headers: {
+    "Authorization": `Klaviyo-API-Key ${KLAVIYO_KEY}`,
+    "Content-Type": "application/json",
+    "revision": "2024-02-15"
+  },
+  body: JSON.stringify({
+    data: {
+      type: "event",
+      attributes: {
+        metric_id: "INSERE_AQUI_O_METRIC_ID",
 
-            profile: {
-              email: data.email
-            },
-
-            properties: {
-              prize: data.premio || "",
-              code: data.codigo || ""
-            },
-
-            time: Math.floor(Date.now() / 1000)
+        profile: {
+          data: {
+            type: "profile",
+            attributes: {
+              email: data.email,
+              first_name: data.nome
+            }
           }
-        }
-      })
-    });
+        },
+
+        properties: {
+          prize: data.premio || "",
+          code: data.codigo || ""
+        },
+
+        time: Math.floor(Date.now() / 1000)
+      }
+    }
+  })
+});
 
     console.log("EVENT STATUS:", eventRes.status);
     console.log("EVENT RESPONSE:", await eventRes.text());
@@ -93,3 +99,4 @@ exports.handler = async (event, context) => {
     };
   }
 };
+
