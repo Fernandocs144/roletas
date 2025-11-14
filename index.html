@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FN Brand | Roda da Sorte</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cinza-esc:#1a1a1a; --bg:#0a0a0a;
+  --prata1:#cfd3d7; --prata2:#9aa3ae; --prata3:#6f7884;
+  --dourado1:#d19b23; --dourado2:#f7d778;
+  --vermelho:#e23a2e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* fundo geral */
+body {
+  background: url("imagem/fnbrand.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  color: #fff;
+  font-family: "Poppins", system-ui, Arial;
+  text-align: center;
+}
+
+/* secção teaser inicial */
+.intro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+}
+.intro-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 24px;
+  padding: 60px 40px 40px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+.intro-wheel {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  margin-top: -60px;
+  z-index: 2;
+  position: relative;
+}
+.intro-text { color:#fff; text-align:center; margin-top:20px; }
+.intro-text h2 { font-size:26px; margin-bottom:10px; letter-spacing:.5px; }
+.intro-text p { margin:0 0 20px; font-size:16px; opacity:.9; }
+
+/* botões */
+.btn{
+  display:inline-block;margin-top:12px;padding:12px 26px;border:0;border-radius:12px;
+  cursor:pointer;font-weight:700;color:#161616;
+  background:linear-gradient(135deg,var(--dourado1),var(--dourado2));
+  box-shadow:0 10px 30px rgba(209,155,35,.35),inset 0 1px 0 rgba(255,255,255,.4);
+  transition:transform .12s ease,box-shadow .12s ease
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 14px 34px rgba(209,155,35,.48)}
+.btn:disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.2)}
+
+/* formulário */
+.card{
+  background:#121212;border-radius:18px;padding:22px 18px;
+  box-shadow:0 18px 50px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);
+  max-width:420px;margin:0 auto
+}
+.card input[type="text"],.card input[type="email"]{
+  width:100%;margin:8px 0;padding:12px 14px;border-radius:12px;border:1px solid #2a2a2a;
+  background:#0e0e0e;color:#fff;font-size:16px
+}
+.card .row{display:flex;align-items:center;gap:8px;justify-content:center}
+
+/* roleta */
+.wrap{margin:26px 0 10px;position:relative;display:flex;flex-direction:column;align-items:center}
+.pointer{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%) rotate(180deg);
+  width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;
+  border-bottom:26px solid var(--vermelho);filter:drop-shadow(0 6px 6px rgba(0,0,0,.45));z-index:3
+}
+.ring{position:relative;width:450px;height:450px;border-radius:50%;padding:34px;margin:0 auto;background:#d19b23;box-shadow:inset 0 0 4px rgba(255,255,255,0.15),0 0 30px rgba(0,0,0,0.6)}
+.canvas-shell{position:relative;width:384px;height:384px;border-radius:50%;margin:0 auto;z-index:2}
+#wheel{
+  display:block;width:384px;height:384px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #ffffff 0, #fdfdfd 62%, #f4f4f4 63%);
+  box-shadow:inset 0 0 0 8px rgba(255,255,255,.9), inset 0 0 22px rgba(0,0,0,.15)
+}
+
+/* resultado */
+#result{margin-top:18px}
+.badge{display:inline-block;background:#0e0e0e;color:#fff;border:2px solid var(--dourado2);padding:10px 18px;border-radius:10px;margin-top:10px;font-weight:700}
+.disclaimer{font-size:12px;opacity:.9;max-width:680px;margin:14px auto 0;line-height:1.55}
+.hidden{display:none}
+
+/* responsivo */
+@media (max-width: 768px){
+  .intro{padding:20px}
+  .intro-content{padding:40px 20px 30px}
+  .intro-wheel{max-width:240px;margin-top:-40px}
+  .ring{width:320px;height:320px;padding:26px}
+  .canvas-shell,#wheel{width:270px;height:270px}
+}
+</style>
+</head>
+<body>
+
+<!-- Secção inicial -->
+<div id="intro-block" class="intro">
+  <div class="intro-content">
+    <img src="imagem/roda_intro.png" alt="Roda da Sorte" class="intro-wheel">
+    <div class="intro-text">
+      <h2>RODA A ROLETA E GANHA PRÉMIOS</h2>
+      <p>Joga e consegue descontos até <strong>25%</strong></p>
+      <button id="start" class="btn">JOGAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Formulário -->
+<div id="form-block" class="card hidden">
+  <p style="margin:0 0 8px">Preenche para teres acesso à roleta.</p>
+  <input id="nome" type="text" placeholder="Nome*" required>
+  <input id="email" type="email" placeholder="Email*" required>
+  <div class="row">
+    <input id="consent" type="checkbox">
+    <label for="consent">Aceito os Termos e Condições *</label>
+  </div>
+  <button id="go" class="btn" type="button">ACEDER À ROLETA</button>
+
+  <p id="error" style="color:#ffb3b3;margin:8px 0 0;min-height:20px"></p>
+</div>
+
+<!-- Roleta -->
+
+
+<div id="wheel-block" class="wrap hidden">
+  
+  <div class="pointer"></div>
+  <div class="ring">
+    <div class="canvas-shell">
+      <canvas id="wheel" width="384" height="384"></canvas>
+    </div>
+  </div>
+  <button id="spin" class="btn">GIRAR</button>
+  <div id="result"></div>
+  <div id="disclaimer" class="disclaimer hidden"></div>
+</div>
+
+<script>
+/* =================== Config =================== */
+const prizes = [
+  {label:"-25%", type:"pct",  code:"FNBRAND25",  grad:["#d0271f","#ff4f3f"]},
+  {label:"-5€",  type:"cash", code:"FNCINCO",    grad:["#ffb98a","#f69353"]},
+  {label:"-15%", type:"pct",  code:"FNBRAND15",  grad:["#fbd089","#f4b246"]},
+  {label:"-10%", type:"pct",  code:"FNBRAND10",  grad:["#ffa157","#ff7e00"]},
+  {label:"🎁 Presente", type:"gift", code:"FNSURPRESA", grad:["#f6e3c0","#f0d3a0"]},
+  {label:"-5%",  type:"pct",  code:"FNBRAND5",   grad:["#f5e4bf","#fff5d6"]}
+];
+const CONDITIONS = {
+  pct:"válido em compras superiores a 30€.",
+  cash:"válido em compras superiores a 30€.",
+  gift:"válido na compra de 1 produto."
+};
+
+/* =================== DOM =================== */
+const introBlock=document.getElementById('intro-block');
+const formBlock=document.getElementById('form-block');
+const wheelBlock=document.getElementById('wheel-block');
+const startBtn=document.getElementById('start');
+const goBtn=document.getElementById('go');
+const spinBtn=document.getElementById('spin');
+const errorEl=document.getElementById('error');
+const resultEl=document.getElementById('result');
+const disclaimer=document.getElementById('disclaimer');
+const canvas=document.getElementById('wheel');
+const ctx=canvas.getContext('2d');
+
+/* =================== Estado =================== */
+let emailActual=null;
+const N=prizes.length, ARC=2*Math.PI/N;
+let spinning=false;
+
+/* =================== Ecrã inicial =================== */
+startBtn.addEventListener('click',()=>{
+  introBlock.classList.add('hidden');
+  formBlock.classList.remove('hidden');
+});
+
+/* =================== Desenho da Roda =================== */
+function drawWheel(rot=0){
+  const cx = canvas.width/2, cy = canvas.height/2, r = 180;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  for(let i=0; i<N; i++){
+    const s = rot + i * ARC, e = s + ARC;
+    const g = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+    g.addColorStop(0, prizes[i].grad[0]);
+    g.addColorStop(1, prizes[i].grad[1]);
+
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,s,e);
+    ctx.closePath();
+    ctx.fillStyle = g;
+    ctx.fill();
+
+    // texto
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(s + ARC/2);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fff";
+    if(prizes[i].type==="gift"){
+      ctx.font = "700 34px Poppins";
+      ctx.fillText("🎁", r * 0.60, -4);
+      ctx.font = "700 14px Poppins";
+      ctx.fillText("Presente Surpresa", r * 0.60, 18);
+    }else{
+      ctx.font = "700 18px Poppins";
+      ctx.fillText(prizes[i].label, r * 0.60, 8);
+    }
+    ctx.restore();
+  }
+
+  // pontos de referência junto ao aro
+  for(let i=0;i<N;i++){
+    const ang = (i * ARC) + ARC/2 + rot;
+    const rx = (r * 0.82) * Math.cos(ang) + cx;
+    const ry = (r * 0.82) * Math.sin(ang) + cy;
+    ctx.beginPath();
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    ctx.arc(rx, ry, 3, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+}
+drawWheel(0);
+
+/* =================== Animação =================== */
+function spin(){
+  if(spinning) return;
+  spinning=true; resultEl.innerHTML=""; disclaimer.classList.add('hidden');
+
+  const turns=6+Math.random()*3, duration=4600, start=performance.now();
+
+  function step(t){
+    const p=Math.min((t-start)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    const ang=turns*2*Math.PI*ease;
+    drawWheel(ang);
+
+    if(p<1){ requestAnimationFrame(step); }
+    else {
+  spinning = false;
+
+  // ângulo final da roda (0–2π)
+  let final = ang % (2 * Math.PI);
+  if (final < 0) final += 2 * Math.PI;
+
+  // ângulo da seta (no topo)
+  const pointer = -Math.PI / 2;
+
+  // ângulo relativo entre ponteiro e rotação final
+  let relative = (pointer - final);
+  if (relative < 0) relative += 2 * Math.PI;
+
+  // determinar o índice correto
+  const idx = Math.floor(relative / ARC);
+  const prize = prizes[idx];
+
+  showPrize(prize);
+  spinBtn.disabled = true;
+  spinBtn.textContent = "JÁ JOGASTE";
+
+  if (emailActual) localStorage.setItem("fnbrand_spin_" + emailActual, "used");
+}
+
+  }
+  requestAnimationFrame(step);
+}
+
+/* =================== Resultado + envio ao Klaviyo =================== */
+function showPrize(p){
+  const cond=CONDITIONS[p.type];
+  const titulo = (p.type==="gift") ? "🎁 Presente Surpresa" : `${p.label} de desconto`;
+
+  resultEl.innerHTML =
+    `<div style="margin-top:10px;font-size:22px;font-weight:700">${titulo}</div>
+     <div class="badge">CÓDIGO: ${p.code}</div>
+     <div style="margin-top:8px;opacity:.9">${cond}</div>`;
+
+  disclaimer.innerHTML =
+    `Enviámos-te um e-mail com o código para que o possas utilizar. Se não o encontrares, verifica a pasta de spam ou promoções.
+     <br><br><strong>Condições:</strong> Desconto por compra mínima de 30€. Limitado a 1 utilização por cliente. Não acumulável com outras promoções. Válido até dia <strong>30 de Novembro</strong>.`;
+
+  disclaimer.classList.remove('hidden');
+
+  // === Enviar dados para o Netlify (→ Klaviyo) ===
+  fetch("/.netlify/functions/klaviyo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      nome: document.getElementById('nome').value.trim(),
+      email: emailActual || document.getElementById('email').value.trim().toLowerCase(),
+      codigo: p.code,
+      premio: p.label
+    })
+  })
+  .then(r => r.json())
+  .then(d => console.log("Resposta Klaviyo:", d))
+  .catch(err => console.error("Erro ao enviar para função:", err));
+}
+
+
+/* =================== Formulário =================== */
+function showWheel(){ formBlock.classList.add('hidden'); wheelBlock.classList.remove('hidden'); drawWheel(0); }
+goBtn.addEventListener('click',()=>{
+  const nome=document.getElementById('nome').value.trim();
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  const ok=document.getElementById('consent').checked;
+  if(!nome||!email||!ok){ errorEl.textContent="Preenche tudo e aceita os termos."; return; }
+  errorEl.textContent=""; emailActual=email; showWheel();
+
+  const used=localStorage.getItem("fnbrand_spin_"+email)==="used";
+  if(used){
+    spinBtn.disabled=true; spinBtn.textContent="JÁ JOGASTE";
+    resultEl.innerHTML=`<div style="font-weight:700">Já participaste com este e-mail.</div>
+                        <div style="opacity:.9">Consulta o teu e-mail para o código recebido.</div>`;
+  }else{
+    spinBtn.disabled=false; spinBtn.textContent="GIRAR";
+  }
+});
+spinBtn.addEventListener('click',spin);
+</script>
+</body>
+</html>
