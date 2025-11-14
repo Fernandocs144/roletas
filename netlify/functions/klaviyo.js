@@ -11,6 +11,9 @@ exports.handler = async (event) => {
   const KLAVIYO_KEY = process.env.KLAVIYO_PRIVATE_KEY;
   const data = JSON.parse(event.body || "{}");
 
+  console.log("KEY NETLIFY:", KLAVIYO_KEY);
+  console.log("DATA RECEBIDO:", data);
+
   if (!data.email) {
     return {
       statusCode: 400,
@@ -19,8 +22,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    // 1️⃣ Criar / actualizar perfil no Klaviyo
-    await fetch("https://a.klaviyo.com/api/profiles/", {
+    // 1️⃣ Criar / actualizar perfil
+    const profileResponse = await fetch("https://a.klaviyo.com/api/profiles/", {
       method: "POST",
       headers: {
         "Authorization": `Klaviyo-API-Key ${KLAVIYO_KEY}`,
@@ -42,8 +45,12 @@ exports.handler = async (event) => {
       })
     });
 
-    // 2️⃣ Disparar evento “wheel_spin”
-    await fetch("https://a.klaviyo.com/api/events/", {
+    console.log("PROFILE STATUS:", profileResponse.status);
+    console.log("PROFILE TEXT:", await profileResponse.text());
+
+
+    // 2️⃣ Disparar evento
+    const eventResponse = await fetch("https://a.klaviyo.com/api/events/", {
       method: "POST",
       headers: {
         "Authorization": `Klaviyo-API-Key ${KLAVIYO_KEY}`,
@@ -54,8 +61,8 @@ exports.handler = async (event) => {
         data: {
           type: "event",
           attributes: {
-            metric: { name: "wheel_spin" },
-            customer_properties: { "$email": data.email },
+            metric: { name: "Roleta - Código Atribuído" },
+            customer_properties: { email: data.email },
             properties: {
               prize: data.premio || "",
               code: data.codigo || ""
@@ -65,6 +72,9 @@ exports.handler = async (event) => {
         }
       })
     });
+
+    console.log("EVENT STATUS:", eventResponse.status);
+    console.log("EVENT RESPONSE:", await eventResponse.text());
 
     return {
       statusCode: 200,
@@ -79,3 +89,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
