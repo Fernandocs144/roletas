@@ -42,7 +42,7 @@ exports.handler = async (event) => {
       })
     });
 
-    // 2️⃣ Disparar evento “Roleta - Código Atribuído”
+    // 2️⃣ Disparar evento “wheel_spin”
     await fetch("https://a.klaviyo.com/api/events/", {
       method: "POST",
       headers: {
@@ -54,8 +54,8 @@ exports.handler = async (event) => {
         data: {
           type: "event",
           attributes: {
-            metric: { name: "Roleta - Código Atribuído" },
-            customer_properties: { email: data.email },
+            metric: { name: "wheel_spin" },
+            customer_properties: { "$email": data.email },
             properties: {
               prize: data.premio || "",
               code: data.codigo || ""
