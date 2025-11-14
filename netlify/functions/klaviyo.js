@@ -1,82 +1,90 @@
-const fetch = require("node-fetch");
+exports.handler = async (event) => {
+  const KLAVIYO_KEY = process.env.KLAVIYO_PRIVATE_KEY;
 
-exports.handler = async (event, context) => {
-  console.log("FUNÇÃO KLAVIYO A CORRER!");
-  console.log("BODY RECEBIDO:", event.body);
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: JSON.stringify({ error: "Método não permitido" })
+    };
+  }
+
+  const data = JSON.parse(event.body || "{}");
+
+  console.log("KEY NETLIFY:", KLAVIYO_KEY);
+  console.log("DATA RECEBIDO:", data);
+
+  if (!data.email) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Email em falta" })
+    };
+  }
 
   try {
-    // Garantir que temos body
-    if (!event.body) {
-      console.log("ERRO: event.body vazio");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Body vazio" })
-      };
-    }
-
-    const data = JSON.parse(event.body);
-    console.log("JSON PARSED:", data);
-
-    // Verificar email (obrigatório)
-    if (!data.email) {
-      console.log("ERRO: Email em falta");
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Email é obrigatório" })
-      };
-    }
-
-    const KLAVIYO_KEY = process.env.KLAVIYO_KEY;
-    console.log("USING KLAVIYO KEY:", KLAVIYO_KEY ? "OK" : "NÃO DEFINIDA");
-
-    // Construção do payload para Klaviyo
-    const payload = {
-      data: {
-        type: "profile",
-        attributes: {
-          email: data.email,
-          first_name: data.nome || "",
-          properties: {
-            prize: data.premio || "",
-            code: data.codigo || ""
-          }
-        }
-      }
-    };
-
-    console.log("PAYLOAD PARA KLAVIYO:", JSON.stringify(payload, null, 2));
-
-    // Chamada à API da Klaviyo
-    console.log("A ENVIAR PARA KLAVIYO...");
-
-    const response = await fetch("https://a.klaviyo.com/api/profiles/", {
+    // 1️⃣ Criar / actualizar perfil no Klaviyo
+    const profileResponse = await fetch("https://a.klaviyo.com/api/profiles/", {
       method: "POST",
       headers: {
-        Authorization: `Klaviyo-API-Key ${KLAVIYO_KEY}`,
+        "Authorization": `Klaviyo-API-Key ${KLAVIYO_KEY}`,
         "Content-Type": "application/json",
-        revision: "2024-02-15"
+        "revision": "2024-02-15"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        data: {
+          type: "profile",
+          attributes: {
+            email: data.email,
+            first_name: data.nome || "",
+            properties: {
+              prize: data.premio || "",
+              code: data.codigo || ""
+            }
+          }
+        }
+      })
     });
 
-    const resultText = await response.text();
+    console.log("PROFILE STATUS:", profileResponse.status);
+    console.log("PROFILE TEXT:", await profileResponse.text());
 
-    console.log("RESPOSTA KLAVIYO:", resultText);
+    // 2️⃣ Disparar evento “Roleta - Código Atribuído”
+    const eventResponse = await fetch("https://a.klaviyo.com/api/events/", {
+      method: "POST",
+      headers: {
+        "Authorization": `Klaviyo-API-Key ${KLAVIYO_KEY}`,
+        "Content-Type": "application/json",
+        "revision": "2024-02-15"
+      },
+      body: JSON.stringify({
+        data: {
+          type: "event",
+          attributes: {
+            metric: { name: "Roleta - Código Atribuído" },
+            customer_properties: { email: data.email },
+            properties: {
+              prize: data.premio || "",
+              code: data.codigo || ""
+            },
+            time: Math.floor(Date.now() / 1000)
+          }
+        }
+      })
+    });
+
+    console.log("EVENT STATUS:", eventResponse.status);
+    console.log("EVENT RESPONSE:", await eventResponse.text());
 
     return {
-      statusCode: response.status,
-      body: resultText
+      statusCode: 200,
+      body: JSON.stringify({ success: true })
     };
 
-  } catch (error) {
-    console.log("ERRO GERAL NA FUNÇÃO:", error);
-
+  } catch (err) {
+    console.error("Erro Klaviyo:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: "Erro interno na função",
-        detalhes: error.message
-      })
+      body: JSON.stringify({ error: err.message })
     };
   }
 };
+
