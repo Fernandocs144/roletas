@@ -1,8 +1,5 @@
 exports.handler = async (event, context) => {
   try {
-    // ============================
-    // 1. LOG PARA DEPURAÇÃO
-    // ============================
     console.log("KEY NETLIFY:", process.env.KLAVIYO_PRIVATE_KEY);
 
     const data = JSON.parse(event.body || "{}");
@@ -19,7 +16,7 @@ exports.handler = async (event, context) => {
     }
 
     // ============================
-    // 2. CRIAR / ATUALIZAR PERFIL
+    // 1. CRIAR / ATUALIZAR PERFIL
     // ============================
     const profileRes = await fetch("https://a.klaviyo.com/api/profiles/", {
       method: "POST",
@@ -40,12 +37,10 @@ exports.handler = async (event, context) => {
     });
 
     console.log("PROFILE STATUS:", profileRes.status);
-
-    const profileText = await profileRes.text();
-    console.log("PROFILE TEXT:", profileText);
+    console.log("PROFILE TEXT:", await profileRes.text());
 
     // ============================
-    // 3. ENVIAR EVENTO FINAL
+    // 2. ENVIAR EVENTO
     // ============================
     const eventRes = await fetch("https://a.klaviyo.com/api/events/", {
       method: "POST",
@@ -58,10 +53,7 @@ exports.handler = async (event, context) => {
         data: {
           type: "event",
           attributes: {
-            // 👉 CRIA AUTOMATICAMENTE A MÉTRICA SE NÃO EXISTIR
-            metric: {
-              name: "Roleta - Código Atribuído"
-            },
+            metric_id: "INSERE_AQUI_O_METRIC_ID",
 
             profile: {
               email: data.email
@@ -79,23 +71,18 @@ exports.handler = async (event, context) => {
     });
 
     console.log("EVENT STATUS:", eventRes.status);
-
-    const eventText = await eventRes.text();
-    console.log("EVENT RESPONSE:", eventText);
+    console.log("EVENT RESPONSE:", await eventRes.text());
 
     if (!eventRes.ok) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Erro ao enviar evento", detail: eventText })
+        body: JSON.stringify({ error: "Erro ao enviar evento" })
       };
     }
 
-    // ============================
-    // 4. RETORNO FINAL
-    // ============================
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, message: "Evento enviado com sucesso" })
+      body: JSON.stringify({ success: true })
     };
 
   } catch (error) {
@@ -106,6 +93,3 @@ exports.handler = async (event, context) => {
     };
   }
 };
-
-
-
